@@ -1,0 +1,121 @@
+{
+  "info": {
+    "name": "A5 API Starter",
+    "_postman_id": "a5-api-starter-20250824040148",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "System Health",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/system/health"
+      }
+    },
+    {
+      "name": "Auth Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"12345678\"\n}"
+        },
+        "url": "{{baseUrl}}/api/auth/login"
+      }
+    },
+    {
+      "name": "Results Submit",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/results/1/submit"
+      }
+    },
+    {
+      "name": "Reports Normalized",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/reports/normalized?period=1&evaluatee=1"
+      }
+    },
+    {
+      "name": "Reports Progress",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": "{{baseUrl}}/api/reports/progress?period=1&dept=1"
+      }
+    },
+    {
+      "name": "Attachments Upload",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": []
+            },
+            {
+              "key": "period_id",
+              "value": "1"
+            },
+            {
+              "key": "evaluatee_id",
+              "value": "1"
+            },
+            {
+              "key": "indicator_id",
+              "value": "1"
+            },
+            {
+              "key": "evidence_type_id",
+              "value": "1"
+            }
+          ]
+        },
+        "url": "{{baseUrl}}/api/attachments/upload"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:7000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}

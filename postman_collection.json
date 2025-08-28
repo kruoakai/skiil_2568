@@ -1,0 +1,260 @@
+{
+  "info": {
+    "name": "Fullstack Minimal API",
+    "_postman_id": "12345",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:7000/health",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "health"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\":\"admin@example.com\",\n  \"password\":\"admin1234\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:7000/api/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Users List",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:7000/api/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Results (IDOR)",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:7000/api/results?period_id=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "results"
+          ],
+          "query": [
+            {
+              "key": "period_id",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Submit Result",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:7000/api/results/1/submit",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "results",
+            "1",
+            "submit"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Report Normalized",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:7000/api/reports/normalized?period_id=1&base=60",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "reports",
+            "normalized"
+          ],
+          "query": [
+            {
+              "key": "period_id",
+              "value": "1"
+            },
+            {
+              "key": "base",
+              "value": "60"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Report Progress",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:7000/api/reports/progress?period_id=1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "reports",
+            "progress"
+          ],
+          "query": [
+            {
+              "key": "period_id",
+              "value": "1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Create Assignment",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"period_id\": 1,\n  \"evaluator_id\": 2,\n  \"evaluatee_id\": 5\n}"
+        },
+        "url": {
+          "raw": "http://localhost:7000/api/assignments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "7000",
+          "path": [
+            "api",
+            "assignments"
+          ]
+        }
+      }
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,62 @@
+services:
+  db:
+    image: mariadb:10.6
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: skills_db
+      # MYSQL_USER: user1
+      # MYSQL_PASSWORD: user1_1234
+      TZ: Asia/Bangkok
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./02_schema.sql:/docker-entrypoint-initdb.d/02_schema.sql:ro
+    healthcheck:
+      test: ["CMD","mysqladmin","ping","-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+    networks: [fsnet]
+
+  phpmyadmin:
+    image: phpmyadmin:latest
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
+    networks: [fsnet]
+
+  api:
+    build: ./backend
+    env_file:
+      - ./backend/.env
+    ports:
+      - "7000:7000"
+    depends_on:
+      db:
+        condition: service_started
+    networks: [fsnet]
+    volumes:
+      - ./backend/uploads:/app/uploads
+
+  frontend:
+    build: ./frontend
+    environment:
+      NITRO_PORT: 3000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+    networks: [fsnet]
+
+volumes:
+  db_data:
+
+networks:
+  fsnet:
+    driver: bridge
