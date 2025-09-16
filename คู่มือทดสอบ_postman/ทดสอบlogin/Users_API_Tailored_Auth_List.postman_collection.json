@@ -1,0 +1,150 @@
+{
+  "info": {
+    "name": "Users API – Minimal Auth + List (Tailored)",
+    "_postman_id": "tailored-20250908061628",
+    "description": "คอลเลกชันสำหรับระบบของอาจารย์: /api/auth/login (คืน accessToken) + /api/users (ใช้ Bearer {{token}})",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login – set {{token}} from accessToken",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "คาดหวัง: { accessToken: string, user: { id, email, role } }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "let res={}; try{ res=pm.response.json(); }catch(e){}",
+                  "const token = res.accessToken || res.token || (res.data && (res.data.accessToken || res.data.token));",
+                  "pm.test('has token', () => pm.expect(token, 'no token in response').to.be.ok);",
+                  "if (token) pm.environment.set('token', token);",
+                  "const role = (res.user && res.user.role) || (res.data && res.data.user && res.data.user.role);",
+                  "if (role) pm.environment.set('role', role);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "GET /api/users (with Bearer {{token}})",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page={{page}}&itemsPerPage={{itemsPerPage}}&sortBy={{sortBy}}&sortDesc={{sortDesc}}&search={{search}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "itemsPerPage",
+                  "value": "{{itemsPerPage}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "{{sortBy}}"
+                },
+                {
+                  "key": "sortDesc",
+                  "value": "{{sortDesc}}"
+                },
+                {
+                  "key": "search",
+                  "value": "{{search}}"
+                }
+              ]
+            },
+            "description": "เรียกดูรายการผู้ใช้แบบ server-side pagination"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "let j={}; try{ j=pm.response.json(); }catch(e){}",
+                  "pm.test('has items[]', () => pm.expect(j.items, 'items missing').to.be.an('array'));",
+                  "pm.test('has total number', () => pm.expect(j.total, 'total missing').to.be.a('number'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "page",
+      "value": "1"
+    },
+    {
+      "key": "itemsPerPage",
+      "value": "10"
+    },
+    {
+      "key": "sortBy",
+      "value": "id"
+    },
+    {
+      "key": "sortDesc",
+      "value": "false"
+    },
+    {
+      "key": "search",
+      "value": ""
+    }
+  ]
+}

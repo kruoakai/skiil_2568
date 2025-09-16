@@ -1,0 +1,459 @@
+{
+  "info": {
+    "name": "Users API – Auth & CRUD (Teaching Pack v3)",
+    "_postman_id": "teach-v3-20250908055122",
+    "description": "แพ็กทดสอบสำหรับสอนนักศึกษา (เวอร์ชัน 3): ครอบคลุม Auth + Users CRUD + ตัวอย่าง Admin-only และแนวทางปรับรหัสผ่าน 2 แบบ\n\nหมายเหตุ: เส้นทางสำหรับ 'Update Password (Dedicated Endpoint)' เป็นตัวเลือก หากระบบของอาจารย์มี endpoint แยก เช่น PUT /api/users/:id/password",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login – Get JWT (Any Role)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "ล็อกอินเพื่อรับ JWT และตั้งค่า {{token}}"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));",
+                  "let json={};try{json=pm.response.json();}catch(e){}",
+                  "const token=json.token||json.accessToken||(json.data&&(json.data.token||json.data.accessToken));",
+                  "pm.test('has token',()=>pm.expect(token,'token missing').to.be.ok);",
+                  "if(token) pm.environment.set('token', token);",
+                  "const role=(json.user&&json.user.role)||(json.data&&json.data.user&&json.data.user.role);",
+                  "if(role) pm.environment.set('role', role);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me – Verify Token",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('has user',()=>pm.expect(pm.response.json()).to.have.property('user'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users – Server-side",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page={{page}}&itemsPerPage={{itemsPerPage}}&sortBy={{sortBy}}&sortDesc={{sortDesc}}&search={{search}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "itemsPerPage",
+                  "value": "{{itemsPerPage}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "{{sortBy}}"
+                },
+                {
+                  "key": "sortDesc",
+                  "value": "{{sortDesc}}"
+                },
+                {
+                  "key": "search",
+                  "value": "{{search}}"
+                }
+              ]
+            },
+            "description": "ดึงรายการผู้ใช้แบบแบ่งหน้า/ค้นหา/เรียงลำดับ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));",
+                  "const json=pm.response.json();",
+                  "pm.test('shape ok',()=>{pm.expect(json).to.have.property('success',true);pm.expect(json).to.have.property('items').that.is.an('array');pm.expect(json).to.have.property('total').that.is.a('number');});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User (Admin Intended)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{newNameTh}}\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"{{newPassword}}\",\n  \"role\": \"{{newRole}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "สร้างผู้ใช้ใหม่ (โดยปกติ endpoint นี้จำกัดเฉพาะ admin)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/201',()=>pm.expect([200,201]).to.include(pm.response.code));",
+                  "let json={};try{json=pm.response.json();}catch(e){}",
+                  "const id=(json.data&&(json.data.id||(json.data.user&&json.data.user.id)))||json.id;",
+                  "pm.test('has id',()=>pm.expect(id,'id missing').to.be.ok);",
+                  "if(id) pm.environment.set('userId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('has data',()=>pm.expect(pm.response.json()).to.have.property('data'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update User (PUT) – no password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{updateNameTh}}\",\n  \"role\": \"{{updateRole}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "ปรับปรุงฟิลด์ทั่วไป (ไม่เปลี่ยนรหัสผ่าน)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('success true',()=>pm.expect(pm.response.json()).to.have.property('success',true));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update User (PUT) – with password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{updateNameTh}}\",\n  \"role\": \"{{updateRole}}\",\n  \"password\": \"{{newPassword2}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "แนวทางที่ 1: เปลี่ยนรหัสผ่านผ่าน endpoint PUT เดิม (backend ต้องรองรับ hash เงื่อนไข)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));",
+                  "pm.test('success true',()=>pm.expect(pm.response.json()).to.have.property('success',true));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update Password (Dedicated Endpoint)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{newPassword2}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}/password",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}",
+                "password"
+              ]
+            },
+            "description": "แนวทางที่ 2 (ตัวเลือก): หากระบบมี endpoint แยกสำหรับอัปเดตรหัสผ่าน"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/204',()=>pm.expect([200,204]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete User (Admin Intended)",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/204',()=>pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.environment.unset('userId');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Examples",
+      "description": "ตัวอย่างที่ปกติควรอนุญาตเฉพาะผู้ใช้ที่มี role=admin",
+      "item": [
+        {
+          "name": "Create Admin User (role=admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"Admin Seed {{$timestamp}}\",\n  \"email\": \"admin{{$timestamp}}@example.com\",\n  \"password\": \"{{adminSeedPassword}}\",\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "สร้างผู้ใช้ admin เพื่อ seed ระบบ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/201',()=>pm.expect([200,201]).to.include(pm.response.code));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Force Role Change to admin (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "เปลี่ยนบทบาทผู้ใช้ให้เป็น admin (เฉพาะตัวอย่างเรียนรู้ RBAC)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200',()=>pm.response.to.have.status(200));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

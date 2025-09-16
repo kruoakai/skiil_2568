@@ -1,0 +1,215 @@
+{
+  "info": {
+    "name": "Users API – Auth, CRUD, Uploads (Teaching Pack v5)",
+    "_postman_id": "teach-v5-20250908055826",
+    "description": "เพิ่มโฟลเดอร์ Uploads สำหรับสาธิตการอัปโหลดไฟล์ด้วย Multer\n- POST /api/upload/single (multipart/form-data, field: file)\n- GET {{lastUploadUrl}} เพื่อตรวจว่าไฟล์ที่อัปโหลดเสิร์ฟได้จริง",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login – Get JWT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('has token', ()=>pm.expect(j).to.have.property('token').that.is.a('string').and.not.empty);",
+                  "pm.environment.set('token', j.token);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page={{page}}&itemsPerPage={{itemsPerPage}}&sortBy={{sortBy}}&sortDesc={{sortDesc}}&search={{search}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "itemsPerPage",
+                  "value": "{{itemsPerPage}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "{{sortBy}}"
+                },
+                {
+                  "key": "sortDesc",
+                  "value": "{{sortDesc}}"
+                },
+                {
+                  "key": "search",
+                  "value": "{{search}}"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Upload Single File (field: file)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": "sample_upload.png",
+                  "description": "เลือกไฟล์จากเครื่อง (Postman UI) หรือใช้ sample_upload.png"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/single",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "single"
+              ]
+            },
+            "description": "คาดหวัง: 201 Created, { success:true, url:'/uploads/<filename>', file:{ filename, originalname, mimetype, size } }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/201', ()=>pm.expect([200,201]).to.include(pm.response.code));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('has url', ()=>pm.expect(j).to.have.property('url').that.is.a('string').and.includes('/uploads/'));",
+                  "pm.environment.set('lastUploadUrl', j.url);",
+                  "if (j.file) {",
+                  "  pm.test('file meta ok', ()=>{",
+                  "    pm.expect(j.file).to.have.property('filename');",
+                  "    pm.expect(j.file).to.have.property('mimetype');",
+                  "    pm.expect(j.file).to.have.property('size');",
+                  "  });",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get Uploaded File (static)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{lastUploadUrl}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": []
+            },
+            "description": "ดาวน์โหลดไฟล์ที่เพิ่งอัปโหลด คาดหวัง: 200 OK"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "pm.test('content length > 0', ()=> pm.expect(Number(pm.response.headers.get('Content-Length')||'1')).to.be.greaterThan(0));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "page",
+      "value": "1"
+    },
+    {
+      "key": "itemsPerPage",
+      "value": "10"
+    },
+    {
+      "key": "sortBy",
+      "value": "id"
+    },
+    {
+      "key": "sortDesc",
+      "value": "false"
+    },
+    {
+      "key": "search",
+      "value": ""
+    }
+  ]
+}

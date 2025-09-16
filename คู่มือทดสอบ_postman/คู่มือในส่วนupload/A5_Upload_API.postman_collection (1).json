@@ -1,0 +1,430 @@
+{
+  "info": {
+    "_postman_id": "a52f059b-183b-4e87-bb02-8c5ced9d723c",
+    "name": "A5 Upload API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Requests for upload/attachments endpoints grouped by role (evaluatee/evaluator/admin)."
+  },
+  "item": [
+    {
+      "name": "Evaluatee",
+      "item": [
+        {
+          "name": "POST /api/upload/evidence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_evaluatee}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "evidence"
+              ],
+              "query": []
+            },
+            "description": "Upload evidence for self (evaluatee).",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "period_id",
+                  "value": "{{period_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "indicator_id",
+                  "value": "{{indicator_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "evidence_type_id",
+                  "value": "{{evidence_type_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "<SELECT_A_FILE>"
+                  ]
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/upload/mine",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_evaluatee}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/mine",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "mine"
+              ],
+              "query": []
+            },
+            "description": "List own attachments. Add ?period_id={{period_id}}&indicator_id={{indicator_id}} if needed."
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/upload/:id/file",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_evaluatee}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/:id/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                ":id",
+                "file"
+              ],
+              "query": []
+            },
+            "description": "Replace own file for attachment {id}.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "<SELECT_A_FILE>"
+                  ]
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /api/upload/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_evaluatee}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                ":id"
+              ],
+              "query": []
+            },
+            "description": "Update own attachment metadata.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"indicator_id\": \"{{indicator_id}}\",\n  \"evidence_type_id\": \"{{evidence_type_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/upload/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_evaluatee}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                ":id"
+              ],
+              "query": []
+            },
+            "description": "Delete own attachment {id}."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Evaluator",
+      "item": [
+        {
+          "name": "GET /api/upload/evaluatee/:evaluateeId",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_evaluator}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/evaluatee/:evaluateeId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "evaluatee",
+                ":evaluateeId"
+              ],
+              "query": []
+            },
+            "description": "List attachments of assigned evaluatee in period. Add ?period_id={{period_id}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Admin",
+      "item": [
+        {
+          "name": "POST /api/upload/admin/evidence",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/admin/evidence",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "admin",
+                "evidence"
+              ],
+              "query": []
+            },
+            "description": "Admin upload on behalf of evaluatee.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "period_id",
+                  "value": "{{period_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "evaluatee_id",
+                  "value": "{{evaluatee_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "indicator_id",
+                  "value": "{{indicator_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "evidence_type_id",
+                  "value": "{{evidence_type_id}}",
+                  "type": "text"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "<SELECT_A_FILE>"
+                  ]
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "GET /api/upload/admin",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/admin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "admin"
+              ],
+              "query": []
+            },
+            "description": "Search attachments by filters: ?period_id=&evaluatee_id=&indicator_id="
+          },
+          "response": []
+        },
+        {
+          "name": "PUT /api/upload/admin/:id/file",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/admin/:id/file",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "admin",
+                ":id",
+                "file"
+              ],
+              "query": []
+            },
+            "description": "Admin replace file of attachment {id}.",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": [
+                    "<SELECT_A_FILE>"
+                  ]
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "PATCH /api/upload/admin/:id",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/admin/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "admin",
+                ":id"
+              ],
+              "query": []
+            },
+            "description": "Admin update attachment metadata / reassign period/evaluatee.",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"period_id\": \"{{period_id}}\",\n  \"evaluatee_id\": \"{{evaluatee_id}}\",\n  \"indicator_id\": \"{{indicator_id}}\",\n  \"evidence_type_id\": \"{{evidence_type_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "DELETE /api/upload/admin/:id",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token_admin}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/upload/admin/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "upload",
+                "admin",
+                ":id"
+              ],
+              "query": []
+            },
+            "description": "Admin delete attachment {id}."
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}

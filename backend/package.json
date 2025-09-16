@@ -8,7 +8,8 @@
     "dev": "nodemon server.js",
     "lint": "echo \"(optional)\"",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+     "test1": "jest --runInBand"
   },
   "dependencies": {
     "bcrypt": "^5.1.1",

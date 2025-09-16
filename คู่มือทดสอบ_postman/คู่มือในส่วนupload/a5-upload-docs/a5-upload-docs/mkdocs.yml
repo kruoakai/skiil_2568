@@ -1,0 +1,42 @@
+site_name: A5 Upload Guide
+site_description: คู่มือระบบอัปโหลดหลักฐาน (Attachments) สำหรับการประเมินบุคลากร
+site_url: http://localhost:8000
+theme:
+  name: material
+  language: th
+  features:
+    - navigation.sections
+    - navigation.tracking
+    - navigation.top
+    - navigation.expand
+    - toc.integrate
+    - content.code.copy
+    - content.action.edit
+    - content.tabs.link
+plugins:
+  - search
+  - mermaid2
+  - with-pdf:
+      output_path: site/A5_Upload_Guide.pdf
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.tabbed
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - attr_list
+  - tables
+  - footnotes
+  - toc:
+      permalink: true
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/your-org/your-repo
+nav:
+  - บทนำ: index.md
+  - API: api.md
+  - ความปลอดภัย: security.md
+  - การทดสอบ: testing.md
+  - ภาคผนวก: appendix.md

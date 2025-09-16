@@ -82,7 +82,7 @@ CREATE TABLE dept_fields (
 CREATE TABLE users (
   id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   email VARCHAR(255) NOT NULL UNIQUE,
-  password VARCHAR(255) NOT NULL,        -- ใช้ชื่อคอลัมน์ให้ตรงกับ seed
+  password_hash VARCHAR(255) NOT NULL,        -- ใช้ชื่อคอลัมน์ให้ตรงกับ seed
   name_th VARCHAR(255) NOT NULL,
   role ENUM('admin','evaluator','evaluatee') NOT NULL,
   status ENUM('active','disabled') NOT NULL DEFAULT 'active',

@@ -1,0 +1,466 @@
+{
+  "info": {
+    "name": "Users API – Auth, CRUD, Docs (Teaching Pack v4)",
+    "_postman_id": "teach-v4-20250908055436",
+    "description": "ปรับชุดทดสอบให้สอดคล้องกับสคีมาผลลัพธ์ที่ใช้จริงในระบบ:\n- ทุกคำขอคาดว่า response มีรูปแบบหลัก: { success: true, ... }\n- /auth/login คาดว่าให้: { success:true, token:string, user:{ id,email,role,... } }\n- /auth/me คาดว่าให้: { success:true, user:{...} }\n- /users (list) คาดว่าให้: { success:true, items:[], total:number, page, itemsPerPage }\n- /users/:id (get/create/update) คาดว่าให้: { success:true, data:{...} }\n- /users/:id (delete) คาดว่าให้: { success:true } หรือ 204 No Content\n\nเพิ่มโฟลเดอร์ API Docs: ตรวจสอบ Swagger/OpenAPI endpoint ทั่วไป /api-docs(.json)/swagger.json/openapi.json และตรวจว่ามี path /api/users",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login – Get JWT (schema-aligned)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "คาดหวังสคีมา: { success:true, token:string, user:{ id,email,role } }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('has token', ()=>pm.expect(j).to.have.property('token').that.is.a('string').and.not.empty);",
+                  "pm.environment.set('token', j.token);",
+                  "pm.test('has user object', ()=>pm.expect(j).to.have.property('user').that.is.an('object'));",
+                  "if (j.user && j.user.role) pm.environment.set('role', j.user.role);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me – Verify Token (schema-aligned)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('has user', ()=>pm.expect(j).to.have.property('user').that.is.an('object'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users (schema-aligned)",
+      "item": [
+        {
+          "name": "List Users",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page={{page}}&itemsPerPage={{itemsPerPage}}&sortBy={{sortBy}}&sortDesc={{sortDesc}}&search={{search}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "itemsPerPage",
+                  "value": "{{itemsPerPage}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "{{sortBy}}"
+                },
+                {
+                  "key": "sortDesc",
+                  "value": "{{sortDesc}}"
+                },
+                {
+                  "key": "search",
+                  "value": "{{search}}"
+                }
+              ]
+            },
+            "description": "คาดหวัง: { success:true, items:[], total:number, page, itemsPerPage }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('items array', ()=>pm.expect(j).to.have.property('items').that.is.an('array'));",
+                  "pm.test('total number', ()=>pm.expect(j).to.have.property('total').that.is.a('number'));",
+                  "pm.test('page & itemsPerPage', ()=>{ pm.expect(j).to.have.property('page'); pm.expect(j).to.have.property('itemsPerPage'); });"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{newNameTh}}\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"{{newPassword}}\",\n  \"role\": \"{{newRole}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "คาดหวัง: { success:true, data:{ id,... } }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/201', ()=>pm.expect([200,201]).to.include(pm.response.code));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('data object', ()=>pm.expect(j).to.have.property('data').that.is.an('object'));",
+                  "const id = j.data && j.data.id;",
+                  "pm.test('has data.id', ()=>pm.expect(id, 'data.id missing').to.be.ok);",
+                  "if (id) pm.environment.set('userId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('data object', ()=>pm.expect(j).to.have.property('data').that.is.an('object'));",
+                  "pm.test('data.id==userId', ()=>pm.expect(String(j.data.id)).to.eql(String(pm.environment.get('userId'))));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update User (PUT) – no password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{updateNameTh}}\",\n  \"role\": \"{{updateRole}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "คาดหวัง: { success:true, data:{ ... } }"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));",
+                  "pm.test('data object', ()=>pm.expect(j).to.have.property('data').that.is.an('object'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update User (PUT) – with password",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{updateNameTh}}\",\n  \"role\": \"{{updateRole}}\",\n  \"password\": \"{{newPassword2}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "คาดหวัง: { success:true, data:{ ... } } (ระบบต้อง hash password ใน backend)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "const j = pm.response.json();",
+                  "pm.test('success true', ()=>pm.expect(j).to.have.property('success', true));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/204', ()=>pm.expect([200,204]).to.include(pm.response.code));",
+                  "if (pm.response.code !== 204) {",
+                  "  try { const j = pm.response.json(); pm.expect(j).to.have.property('success', true); } catch (e) {}",
+                  "}",
+                  "pm.environment.unset('userId');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API Docs (Swagger/OpenAPI)",
+      "item": [
+        {
+          "name": "GET {{baseUrl}}{{docsPath}}",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}{{docsPath}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "let j={}; try{ j = pm.response.json(); }catch(e){}",
+                  "pm.test('is OpenAPI/Swagger', ()=> pm.expect(j.openapi || j.swagger, 'missing openapi/swagger key').to.be.ok);",
+                  "const pathKey = pm.environment.get('docsUsersPath');",
+                  "if (pathKey) { pm.test('has users path', ()=> pm.expect(j.paths).to.have.property(pathKey)); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fallback: /api-docs.json",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api-docs.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api-docs.json"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', ()=>pm.response.to.have.status(200));",
+                  "let j={}; try{ j = pm.response.json(); }catch(e){}",
+                  "pm.test('is OpenAPI/Swagger', ()=> pm.expect(j.openapi || j.swagger, 'missing openapi/swagger key').to.be.ok);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Fallback: /swagger.json",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/swagger.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "swagger.json"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fallback: /openapi.json",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/openapi.json",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "openapi.json"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "page",
+      "value": "1"
+    },
+    {
+      "key": "itemsPerPage",
+      "value": "10"
+    },
+    {
+      "key": "sortBy",
+      "value": "id"
+    },
+    {
+      "key": "sortDesc",
+      "value": "false"
+    },
+    {
+      "key": "search",
+      "value": ""
+    }
+  ]
+}

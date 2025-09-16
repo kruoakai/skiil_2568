@@ -1,0 +1,306 @@
+{
+  "info": {
+    "name": "Users API – Auth & CRUD (Teaching Pack v2)",
+    "_postman_id": "teach-20250908054407",
+    "description": "แพ็กทดสอบสำหรับสอนนักศึกษา ครอบคลุม Auth + Users CRUD\n- POST /api/auth/login → รับ JWT และตั้ง environment token\n- GET  /api/auth/me → ตรวจสอบ token\n- GET  /api/users → แบ่งหน้า/ค้นหา/เรียง\n- POST /api/users → สร้างผู้ใช้ (เก็บ userId ไว้ใช้งานต่อ)\n- GET  /api/users/:id → อ่านผู้ใช้ที่เพิ่งสร้าง\n- PUT  /api/users/:id → ปรับปรุงผู้ใช้\n- DELETE /api/users/:id → ลบผู้ใช้\n\nคำแนะนำ: Import คู่กับ Environment v2 แล้วรันตามลำดับโฟลเดอร์ Auth → Users",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login – Get JWT",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "ล็อกอินเพื่อรับ JWT; จะตั้งค่า {{token}} และ {{role}} อัตโนมัติ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "let json = {}; try { json = pm.response.json(); } catch(e) {}",
+                  "const token = json.token || json.accessToken || (json.data && (json.data.token || json.data.accessToken));",
+                  "pm.test('has token', () => pm.expect(token, 'token missing').to.be.ok);",
+                  "if (token) pm.environment.set('token', token);",
+                  "const role = (json.user && json.user.role) || (json.data && json.data.user && json.data.user.role);",
+                  "if (role) pm.environment.set('role', role);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me – Verify Token",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/auth/me",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "auth",
+                "me"
+              ]
+            },
+            "description": "ตรวจสอบว่า token ใช้งานได้และบทบาทตรงตามระบบ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('has user', () => pm.expect(json).to.have.property('user'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "List Users – Server-side",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users?page={{page}}&itemsPerPage={{itemsPerPage}}&sortBy={{sortBy}}&sortDesc={{sortDesc}}&search={{search}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{page}}"
+                },
+                {
+                  "key": "itemsPerPage",
+                  "value": "{{itemsPerPage}}"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "{{sortBy}}"
+                },
+                {
+                  "key": "sortDesc",
+                  "value": "{{sortDesc}}"
+                },
+                {
+                  "key": "search",
+                  "value": "{{search}}"
+                }
+              ]
+            },
+            "description": "ดึงรายการผู้ใช้แบบแบ่งหน้า/ค้นหา/เรียงลำดับ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('shape ok', () => {",
+                  "  pm.expect(json).to.have.property('success', true);",
+                  "  pm.expect(json).to.have.property('items').that.is.an('array');",
+                  "  pm.expect(json).to.have.property('total').that.is.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{newNameTh}}\",\n  \"email\": \"{{newEmail}}\",\n  \"password\": \"{{newPassword}}\",\n  \"role\": \"{{newRole}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users"
+              ]
+            },
+            "description": "สร้างผู้ใช้ใหม่; ใช้ dynamic email ด้วย {{$timestamp}} เพื่อลดโอกาสซ้ำ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/201', () => pm.expect([200,201]).to.include(pm.response.code));",
+                  "let json = {}; try { json = pm.response.json(); } catch(e) {}",
+                  "const id = (json.data && (json.data.id || (json.data.user && json.data.user.id))) || json.id;",
+                  "pm.test('has id', () => pm.expect(id, 'id missing').to.be.ok);",
+                  "if (id) pm.environment.set('userId', id);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "อ่านผู้ใช้จาก environment {{userId}} (ตั้งมาจากขั้นตอน Create)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('has data', () => pm.expect(json).to.have.property('data'));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update User (PUT)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_th\": \"{{updateNameTh}}\",\n  \"role\": \"{{updateRole}}\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "ปรับปรุงฟิลด์ของผู้ใช้ (ตัวอย่างปรับเฉพาะ name_th, role)"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200', () => pm.response.to.have.status(200));",
+                  "const json = pm.response.json();",
+                  "pm.test('success true', () => pm.expect(json).to.have.property('success', true));"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{baseUrl}}/api/users/{{userId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "users",
+                "{{userId}}"
+              ]
+            },
+            "description": "ลบผู้ใช้ที่สร้างขึ้นเพื่อการทดสอบ"
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('status 200/204', () => pm.expect([200,204]).to.include(pm.response.code));",
+                  "pm.environment.unset('userId');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
